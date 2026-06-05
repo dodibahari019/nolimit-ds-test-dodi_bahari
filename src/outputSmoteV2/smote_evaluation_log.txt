@@ -1,0 +1,125 @@
+
+=================================================================
+  EVALUASI FINAL v2.0 (+SMOTE) - SVM + SBERT + SMOTE
+  Start     : 2026-06-05 09:36:58
+  Model     : SVM RBF C=100 gamma=scale +SMOTE
+  Input dir : outputSmote/
+  X_TEST    : data ORIGINAL (imbalanced) - tidak di-SMOTE!
+  Referensi : v1.0 Test F1-Macro=60.06% Neutral=26.74%
+  TUJUAN    : Apakah SMOTE meningkatkan Neutral F1?
+=================================================================
+
+=================================================================
+  TAHAP A: VERIFIKASI FILE INPUT
+=================================================================
+  [OK]   svm_sbert_smote_best_model.joblib ditemukan (6062 KB)
+  [OK]   X_test_emb.npy ditemukan (1798 KB)
+  [OK]   y_test.npy ditemukan (9 KB)
+  [OK]   label_classes.npy ditemukan (0 KB)
+
+=================================================================
+  TAHAP B: LOAD MODEL + TEST DATA ORIGINAL
+=================================================================
+  [OK]   Model: SVC loaded
+  [OK]   X_test : (1199, 384)  dtype=float32
+  [OK]   y_test : (1199,)
+  [OK]   Classes: ['negative', 'neutral', 'positive']
+
+  [PENTING] X_test adalah data ORIGINAL - imbalanced, tidak di-SMOTE.
+  [PENTING] Ini evaluasi jujur di kondisi data real.
+
+
+  [INFO] Distribusi kelas X_test (ORIGINAL):
+    0 -> negative     |  222 sampel (18.5%)
+    1 -> neutral      |   65 sampel (5.4%)
+    2 -> positive     |  912 sampel (76.1%)
+
+=================================================================
+  TAHAP C: PREDIKSI PADA X_TEST ORIGINAL
+=================================================================
+  [OK]   Prediksi: 1199 sampel dalam 3.540s (339 sampel/detik)
+  [OK]   Probabilitas: (1199, 3)  mean max_prob = 0.9320
+
+=================================================================
+  TAHAP D: KALKULASI METRIK - TEST SET ORIGINAL
+=================================================================
+  [OK]   smote_eval_classification_report.txt tersimpan
+
+-----------------------------------------------------------------
+  HASIL EVALUASI TEST SET FINAL [+SMOTE]
+-----------------------------------------------------------------
+  Metrik                    v1.0 Test    v2.0 Test       Gain
+  ----------------------------------------------------------
+  F1-Macro                     60.06%       53.70%     -6.36% [TURUN]
+  F1-Weighted                  80.45%       81.33%     +0.88% [GAIN!]
+  Accuracy                     78.57%       82.49%     +3.92% [GAIN!]
+  F1 Negative                  65.54%       66.38%     +0.84% [GAIN!]
+  F1 Neutral                   26.74%        4.26%    -22.48% [TURUN]
+  F1 Positive                  87.91%       90.47%     +2.56% [GAIN!]
+
+  AUC-Macro: 0.8452  |  Mean AP: 0.5985
+
+  Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.64      0.68      0.66       222
+     Neutral       0.07      0.03      0.04        65
+    Positive       0.89      0.92      0.90       912
+
+    accuracy                           0.82      1199
+   macro avg       0.54      0.54      0.54      1199
+weighted avg       0.80      0.82      0.81      1199
+
+
+  [CATATAN] CV v2.0=97.03% diukur di SMOTE data (seimbang)
+  [CATATAN] Test v2.0 di atas adalah di X_test ORIGINAL (imbalanced)
+  [CATATAN] Ini yang relevan untuk deployment nyata
+  [OK]   smote_eval_metrics_summary.csv tersimpan
+
+=================================================================
+  TAHAP E: MEMBUAT 9 VISUALISASI
+=================================================================
+  [OK]   viz_smote_eval_confusion_matrix.png (123 KB)
+  [OK]   viz_smote_eval_per_class_metrics.png (185 KB)
+  [OK]   viz_smote_eval_v1_vs_v2_test.png (169 KB) <- UNGGULAN
+  [OK]   viz_smote_eval_roc_multiclass.png (92 KB)
+  [OK]   viz_smote_eval_pr_curve.png (91 KB)
+  [OK]   viz_smote_eval_confidence_dist.png (112 KB)
+  [OK]   viz_smote_eval_calibration.png (162 KB)
+  [OK]   viz_smote_eval_error_analysis.png (122 KB)
+  [OK]   viz_smote_eval_summary_dashboard.png (288 KB) <- UNGGULAN
+
+=================================================================
+  EVALUASI v2.0 (+SMOTE) SELESAI!
+
+  MODEL: SVM RBF C=100 gamma=scale +SMOTE k=7
+
+  PERBANDINGAN TEST SCORE (X_test ORIGINAL):
+    Metrik                  v1.0 (no SMOTE)   v2.0 (+SMOTE)     Gain
+    F1-Macro                         60.06%          53.70%   -6.36%
+    F1-Weighted                      80.45%          81.33%   +0.88%
+    Accuracy                         78.57%          82.49%   +3.92%
+    F1 Negative                      65.54%          66.38%   +0.84%
+    F1 Neutral                       26.74%           4.26%  -22.48%
+    F1 Positive                      87.91%          90.47%   +2.56%
+
+  KESIMPULAN:
+    F1-Macro gain : -6.36%
+    Neutral F1 gain: -22.48%
+
+  OUTPUT (folder: outputSmote/):
+    smote_eval_classification_report.txt
+    smote_eval_metrics_summary.csv
+    viz_smote_eval_confusion_matrix.png
+    viz_smote_eval_per_class_metrics.png
+    viz_smote_eval_v1_vs_v2_test.png        <- UNGGULAN
+    viz_smote_eval_roc_multiclass.png
+    viz_smote_eval_pr_curve.png
+    viz_smote_eval_confidence_dist.png
+    viz_smote_eval_calibration.png
+    viz_smote_eval_error_analysis.png
+    viz_smote_eval_summary_dashboard.png    <- UNGGULAN
+    smote_evaluation_log.txt
+
+  Waktu total: 0h 0m 24s
+=================================================================

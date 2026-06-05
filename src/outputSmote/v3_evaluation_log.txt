@@ -1,0 +1,93 @@
+
+=================================================================
+  EVALUASI FINAL v3.0 (SMOTE PARTIAL) — SVM + SBERT
+  Start  : 2026-06-05 10:18:04
+  X_TEST : data ORIGINAL (imbalanced) — tidak di-SMOTE!
+  Ref v1.0: F1-Macro=60.06% | Neutral=26.74%
+  Ref v2.0: F1-Macro=53.70% | Neutral=4.26% (GAGAL)
+  TUJUAN : v3.0 harus lebih baik dari v2.0, dan ideally v1.0
+=================================================================
+
+=================================================================
+  TAHAP A: VERIFIKASI FILE
+=================================================================
+  [OK]   svm_sbert_smote_v3_best_model.joblib (4556 KB)
+  [OK]   X_test_emb.npy (1798 KB)
+  [OK]   y_test.npy (9 KB)
+  [OK]   label_classes.npy (0 KB)
+
+=================================================================
+  TAHAP B: LOAD MODEL + TEST DATA
+=================================================================
+  [OK]   Model: SVC
+  [OK]   X_test: (1199, 384) | y_test: (1199,)
+  [OK]   Classes: ['negative', 'neutral', 'positive']
+
+  Distribusi X_test (ORIGINAL):
+    negative     |  222 (18.5%)
+    neutral      |   65 (5.4%)
+    positive     |  912 (76.1%)
+
+=================================================================
+  TAHAP C: PREDIKSI
+=================================================================
+  [OK]   1199 sampel dalam 1.889s (635 sampel/s)
+  [OK]   Proba: (1199, 3) | mean max = 0.8755
+
+=================================================================
+  TAHAP D: METRIK EVALUASI
+=================================================================
+
+-----------------------------------------------------------------
+  HASIL TEST SET FINAL v3.0
+-----------------------------------------------------------------
+  Metrik                  v1.0      v2.0      v3.0   Gain v3-v1
+  ------------------------------------------------------------
+  F1-Macro              60.06%    53.70%    55.41%      -4.65% [TURUN]
+  F1-Weighted           80.45%    81.33%    81.87%      +1.42% [GAIN]
+  Accuracy              78.57%    82.49%    82.74%      +4.17% [GAIN]
+  F1 Negative           65.54%    66.38%    67.53%      +1.99% [GAIN]
+  F1 Neutral            26.74%     4.26%     8.08%     -18.66% [TURUN]
+  F1 Positive           87.91%    90.47%    90.62%      +2.71% [GAIN]
+
+  Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.65      0.71      0.68       222
+     Neutral       0.12      0.06      0.08        65
+    Positive       0.90      0.91      0.91       912
+
+    accuracy                           0.83      1199
+   macro avg       0.56      0.56      0.55      1199
+weighted avg       0.81      0.83      0.82      1199
+
+  [OK]   v3_eval_classification_report.txt tersimpan
+  [OK]   v3_eval_metrics_summary.csv tersimpan
+
+=================================================================
+  TAHAP E: VISUALISASI
+=================================================================
+  [OK]   viz_v3_eval_confusion_matrix.png (108 KB)
+  [OK]   viz_v3_eval_per_class_f1.png (77 KB)
+  [OK]   viz_v3_eval_3versions_comparison.png (144 KB) <- UNGGULAN
+  [OK]   viz_v3_eval_roc_curve.png (75 KB)
+  [OK]   viz_v3_eval_pr_curve.png (71 KB)
+  [OK]   viz_v3_eval_confidence_dist.png (79 KB)
+  [OK]   viz_v3_eval_summary_dashboard.png (239 KB) <- UNGGULAN
+
+=================================================================
+  EVALUASI v3.0 SELESAI!
+
+  PERBANDINGAN TEST SCORE:
+  Metrik                  v1.0      v2.0      v3.0      Gain
+  F1-Macro              60.06%    53.70%    55.41%    -4.65%
+  F1-Weighted           80.45%    81.33%    81.87%    +1.42%
+  Accuracy              78.57%    82.49%    82.74%    +4.17%
+  F1 Negative           65.54%    66.38%    67.53%    +1.99%
+  F1 Neutral            26.74%     4.26%     8.08%   -18.66%
+  F1 Positive           87.91%    90.47%    90.62%    +2.71%
+
+  VERDICT: [PERLU PERBAIKAN] v3.0 belum ungguli v1.0. Coba IndoBERT/IndoBERTweet.
+
+  Waktu: 0h 0m 11s
+=================================================================

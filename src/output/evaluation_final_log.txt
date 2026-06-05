@@ -1,0 +1,132 @@
+
+=================================================================
+  EVALUASI FINAL - SVM + SBERT Sentiment Analysis
+  Start     : 2026-06-05 02:52:44
+  TAHAP INI : Evaluasi generalization pada X_test
+              (X_test disentuh PERTAMA KALI di sini!)
+  Model     : SVM RBF C=1 gamma=scale
+  CV F1-Macro (dari tahap Modeling): 58.8400%
+=================================================================
+
+=================================================================
+  TAHAP A: VERIFIKASI FILE INPUT
+=================================================================
+  [OK]   svm_sbert_best_model.joblib ditemukan (4516 KB)
+  [OK]   X_test_emb.npy ditemukan (1798 KB)
+  [OK]   y_test.npy ditemukan (9 KB)
+  [OK]   label_classes.npy ditemukan (0 KB)
+
+=================================================================
+  TAHAP B: LOAD MODEL + TEST DATA
+=================================================================
+  [OK]   Model loaded: SVC
+  [OK]   X_test : (1199, 384)  dtype=float32
+  [OK]   y_test : (1199,)
+  [OK]   Classes: ['negative', 'neutral', 'positive']
+
+  [INFO] Distribusi kelas test set:
+    0 -> negative     |  222 sampel (18.5%)
+    1 -> neutral      |   65 sampel (5.4%)
+    2 -> positive     |  912 sampel (76.1%)
+
+=================================================================
+  TAHAP C: PREDIKSI PADA TEST SET
+=================================================================
+  [OK]   Prediksi selesai: 1199 sampel dalam 2.268s (529 sampel/detik)
+  [OK]   Probabilitas: (1199, 3)  mean max_prob = 0.8339
+
+=================================================================
+  TAHAP D: KALKULASI METRIK EVALUASI FINAL
+=================================================================
+  [OK]   eval_classification_report.txt tersimpan
+
+--------------------------------------------------
+  HASIL EVALUASI TEST SET FINAL
+--------------------------------------------------
+  F1-Macro    : 60.0622%  (CV was: 58.8400%  Gap: +1.2222%)
+  F1-Weighted : 80.4482%
+  Accuracy    : 78.5655%
+  Prec-Macro  : 57.6510%
+  Rec-Macro   : 65.1505%
+  AUC-Macro   : 0.8717
+--------------------------------------------------
+
+  Per Kelas:
+  Kelas                F1   Precision   Recall   Support     AUC      AP
+  ----------------------------------------------------------------------
+  Negative         65.54%      56.31%   78.38%       222  0.9265  0.6972
+  Neutral          26.74%      21.50%   35.38%        65  0.7759  0.1671
+  Positive         87.91%      95.15%   81.69%       912  0.9127  0.9672
+
+  Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.56      0.78      0.66       222
+     Neutral       0.21      0.35      0.27        65
+    Positive       0.95      0.82      0.88       912
+
+    accuracy                           0.79      1199
+   macro avg       0.58      0.65      0.60      1199
+weighted avg       0.84      0.79      0.80      1199
+
+  [OK]   eval_metrics_summary.csv tersimpan
+
+=================================================================
+  TAHAP E: MEMBUAT 9 VISUALISASI
+=================================================================
+  [OK]   viz_eval_confusion_matrix.png (113 KB)
+  [OK]   viz_eval_per_class_metrics.png (178 KB)
+  [OK]   viz_eval_cv_vs_test_gap.png (153 KB)
+  [OK]   viz_eval_roc_multiclass.png (100 KB)
+  [OK]   viz_eval_pr_curve.png (98 KB)
+  [OK]   viz_eval_confidence_dist.png (127 KB)
+  [OK]   viz_eval_calibration.png (165 KB)
+  [OK]   viz_eval_error_analysis.png (127 KB)
+  [OK]   viz_eval_summary_dashboard.png (264 KB) <- UNGGULAN
+
+=================================================================
+  EVALUASI FINAL SELESAI!
+
+  MODEL: SVM RBF C=1 gamma=scale
+
+  HASIL TEST SET:
+    F1-Macro    : 60.0622%
+    F1-Weighted : 80.4482%
+    Accuracy    : 78.5655%
+    AUC-Macro   : 0.8728
+
+  GENERALISASI:
+    CV F1-Macro  : 58.8400%
+    Test F1-Macro: 60.0622%
+    Gap          : +1.2222%  (OK)
+
+  PER KELAS:
+    Kelas              F1        P        R
+    Negative       65.54%  56.31%  78.38%
+    Neutral        26.74%  21.50%  35.38%
+    Positive       87.91%  95.15%  81.69%
+
+  KELAS TERLEMAH: NEUTRAL (F1=26.7%)
+
+  REKOMENDASI SELANJUTNYA:
+    1. Jika Neutral F1 < 50%: coba SMOTE pada X_train_emb
+    2. Perluas grid: tambah C=1000
+    3. Ganti embedding ke IndoBERT/IndoBERTweet
+    4. Audit label jika masih mentok
+
+  OUTPUT:
+    eval_metrics_summary.csv
+    eval_classification_report.txt
+    viz_eval_confusion_matrix.png
+    viz_eval_per_class_metrics.png
+    viz_eval_cv_vs_test_gap.png
+    viz_eval_roc_multiclass.png
+    viz_eval_pr_curve.png
+    viz_eval_confidence_dist.png
+    viz_eval_calibration.png
+    viz_eval_error_analysis.png
+    viz_eval_summary_dashboard.png   <- UNGGULAN
+    evaluation_final_log.txt
+
+  Waktu total: 0h 0m 18s
+=================================================================

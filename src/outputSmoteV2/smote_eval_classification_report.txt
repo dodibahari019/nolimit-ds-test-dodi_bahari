@@ -1,0 +1,28 @@
+CLASSIFICATION REPORT - SVM RBF C=100 gamma=scale +SMOTE k=7
+Test Set Evaluasi Final - 2026-06-05 09:36:58
+============================================================
+
+              precision    recall  f1-score   support
+
+    Negative       0.64      0.68      0.66       222
+     Neutral       0.07      0.03      0.04        65
+    Positive       0.89      0.92      0.90       912
+
+    accuracy                           0.82      1199
+   macro avg       0.54      0.54      0.54      1199
+weighted avg       0.80      0.82      0.81      1199
+
+
+============================================================
+PERBANDINGAN v1.0 vs v2.0 (+SMOTE)
+============================================================
+Metrik                       v1.0 (Test)    v2.0 (Test)       Gain
+-----------------------------------------------------------------
+F1-Macro                          60.06%         53.70%     -6.36%
+F1-Weighted                       80.45%         81.33%     +0.88%
+Accuracy                          78.57%         82.49%     +3.92%
+F1 Negative                       65.54%         66.38%     +0.84%
+F1 Neutral                        26.74%          4.26%    -22.48%
+F1 Positive                       87.91%         90.47%     +2.56%
+
+CAVEAT: CV v1.0=58.84% (imbalanced) vs CV v2.0=97.03% (SMOTE balanced) - TIDAK apple-to-apple!

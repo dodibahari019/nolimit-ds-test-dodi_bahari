@@ -1,0 +1,178 @@
+
+=================================================================
+  MODELING & HYPERPARAMETER TUNING — SVM + SBERT
+  Proyek : Sentiment Analysis Review (Indonesian)
+  Start  : 2026-06-05 01:53:29
+  INPUT DIPAKAI  : data/X_train_emb.npy + data/y_train.npy
+  INPUT DISIMPAN : data/X_test_emb.npy  + data/y_test.npy
+                   -> X_test TIDAK DISENTUH di tahap ini!
+  ALGORITMA : SVC (C-Support Vector Classification)
+  GRID      : kernel=['linear', 'rbf']
+              C=[0.1, 1, 10, 100]
+              gamma=['scale', 'auto', 0.01, 0.001] (RBF saja)
+  CV        : StratifiedKFold(5) | scoring=f1_macro
+  class_weight='balanced' — wajib untuk 3-class imbalanced
+=================================================================
+
+=================================================================
+  TAHAP A: LOAD DATA (Train Only — Test Tidak Disentuh)
+=================================================================
+  [OK]   X_train : (4794, 384)  dtype=float32
+  [OK]   y_train : (4794,)
+  [OK]   Classes : ['negative', 'neutral', 'positive']  (3 kelas)
+
+  [PENTING] X_test & y_test TIDAK di-load di tahap ini.
+  [PENTING] X_test disimpan untuk tahap Evaluasi terpisah.
+
+
+[INFO] Distribusi kelas (Train):
+  0 -> negative     |   885 sampel (18.5%)
+  1 -> neutral      |   262 sampel (5.5%)
+  2 -> positive     |  3647 sampel (76.1%)
+
+[VERIFY] L2 norms sample (harus ~1.0): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+[INFO] SBERT 384-dim L2-normalized -> tidak perlu StandardScaler tambahan
+
+=================================================================
+  TAHAP B: BASELINE MODEL (SVC Linear C=1.0, Evaluasi via CV)
+=================================================================
+[INFO] Params baseline: {'kernel': 'linear', 'C': 1.0, 'class_weight': 'balanced', 'max_iter': 5000, 'tol': 0.0001, 'cache_size': 500, 'random_state': 42, 'probability': False}
+[INFO] Evaluasi via cross_validate — BUKAN X_test!
+[INFO] REF: Emergentmind (2026) — C=1 sering optimal untuk SBERT+SVM
+
+[CV EVAL — Baseline SVC (Linear C=1.0)]
+  F1-Macro   : 57.0725% (±1.4361%)  <- METRIK UTAMA
+  F1-Weighted: 79.3001%
+  Accuracy   : 75.6779%
+  Per fold   : ['56.24%', '55.33%', '58.89%', '58.67%', '56.23%']
+  [OK]   Baseline fit selesai dalam 61.17s | n_support=2546
+  [OK]   CV F1-Macro (baseline): 57.0725% (±1.4361%)
+  [OK]   svm_sbert_baseline_model.joblib tersimpan
+
+=================================================================
+  TAHAP C: HYPERPARAMETER TUNING — GridSearchCV
+=================================================================
+
+  [INFO] Grid: C=[0.1, 1, 10, 100] | kernel=['linear', 'rbf'] | gamma=['scale', 'auto', 0.01, 0.001]
+  [INFO] gamma hanya untuk kernel='rbf'
+  [INFO] Total kombinasi: 4 linear + 16 rbf = 20
+[INFO] probability=False saat tuning — lebih cepat
+[INFO] X_test TIDAK masuk GridSearchCV sama sekali
+
+  Menjalankan GridSearchCV... (bisa memakan beberapa menit untuk RBF)
+  [OK]   GridSearchCV selesai dalam 721.95s
+  [OK]   BEST PARAMS : {'C': 1, 'gamma': 'scale', 'kernel': 'rbf'}
+  [OK]   BEST CV F1-Macro: 58.8448%
+  LINEAR C=0.1 gamma=N/A: F1=57.165% (±1.968%)
+  LINEAR C=1 gamma=N/A: F1=57.072% (±1.436%)
+  LINEAR C=10 gamma=N/A: F1=57.268% (±1.744%)
+  LINEAR C=100 gamma=N/A: F1=53.942% (±2.265%)
+  RBF C=0.1 gamma=scale: F1=56.594% (±1.874%)
+  RBF C=0.1 gamma=auto: F1=10.389% (±0.004%)
+  RBF C=0.1 gamma=0.01: F1=12.743% (±1.694%)
+  RBF C=0.1 gamma=0.001: F1=10.389% (±0.004%)
+  RBF C=1 gamma=scale: F1=58.845% (±3.264%) <-- BEST
+  RBF C=1 gamma=auto: F1=46.168% (±5.413%)
+  RBF C=1 gamma=0.01: F1=55.811% (±0.792%)
+  RBF C=1 gamma=0.001: F1=25.030% (±17.505%)
+  RBF C=10 gamma=scale: F1=57.775% (±1.799%)
+  RBF C=10 gamma=auto: F1=56.699% (±1.701%)
+  RBF C=10 gamma=0.01: F1=57.193% (±1.962%)
+  RBF C=10 gamma=0.001: F1=55.979% (±0.881%)
+  RBF C=100 gamma=scale: F1=57.479% (±1.860%)
+  RBF C=100 gamma=auto: F1=56.901% (±1.418%)
+  RBF C=100 gamma=0.01: F1=57.785% (±1.987%)
+  RBF C=100 gamma=0.001: F1=57.208% (±1.996%)
+  [OK]   svm_sbert_tuning_results.csv tersimpan (20 kombinasi)
+
+=================================================================
+  TAHAP D: EVALUASI BEST MODEL via CV (Bukan Test Set!)
+=================================================================
+
+  [PENTING] Evaluasi CV pada Train Set — X_test MASIH TERSIMPAN.
+
+
+[CV EVAL — Best SVC (RBF C=1)]
+  F1-Macro   : 58.8448% (±3.2642%)  <- METRIK UTAMA
+  F1-Weighted: 82.0453%
+  Accuracy   : 80.6219%
+  Per fold   : ['54.64%', '55.66%', '63.47%', '60.62%', '59.84%']
+
+[RINGKASAN GAIN DARI TUNING — CV TRAIN SET]
+  Metrik                    Baseline CV        Best CV       Gain
+  F1-Macro                     57.0725%       58.8448%   +1.7723% [GAIN!]
+  F1-Weighted                  79.3001%       82.0453%   +2.7452% [GAIN!]
+  Accuracy                     75.6779%       80.6219%   +4.9440% [GAIN!]
+  Prec (Macro)                 56.2613%       57.0580%   +0.7967% [GAIN!]
+  Recall (Macro)               62.8344%       62.0884%   -0.7460% [TURUN]
+
+=================================================================
+  TAHAP E: REFIT BEST MODEL (probability=True untuk Deployment)
+=================================================================
+[INFO] probability=True diaktifkan agar bisa predict_proba()
+[INFO] Refit pada SELURUH X_train — bukan sebagian
+  [OK]   Refit selesai dalam 51.07s | n_support=2653
+
+=================================================================
+  TAHAP F: MEMBUAT VISUALISASI
+=================================================================
+  [OK]   viz_c_vs_f1_kernel.png (170 KB)
+  [OK]   viz_heatmap_c_gamma.png (135 KB)
+  [OK]   viz_kernel_comparison.png (70 KB)
+  [OK]   viz_cv_boxplot.png (60 KB)
+  [OK]   viz_confusion_matrix_baseline.png (75 KB)
+  [OK]   viz_confusion_matrix_best.png (73 KB)
+  [OK]   viz_baseline_vs_best.png (142 KB)
+  [OK]   viz_class_f1_per_kernel.png (93 KB)
+
+=================================================================
+  TAHAP G: SIMPAN BEST MODEL
+=================================================================
+  [OK]   svm_sbert_best_model.joblib -> 4516.0 KB
+  [OK]   Params: {'kernel': 'rbf', 'C': 1, 'class_weight': 'balanced', 'max_iter': 5000, 'tol': 0.0001, 'cache_size': 500, 'random_state': 42, 'probability': True, 'gamma': 'scale'}
+
+=================================================================
+  MODELING & TUNING SVM SBERT — SELESAI!
+
+  DATA TRAIN:
+    X_train : (4794, 384) | SBERT 384-dim L2-normalized
+    Kelas   : ['negative', 'neutral', 'positive']
+
+  DATA TEST (TIDAK DISENTUH):
+    X_test & y_test disimpan untuk tahap Evaluasi
+
+  BEST MODEL:
+    kernel  : RBF
+    C       : 1
+    gamma   : scale
+    CV F1-Macro: 58.8448% (Stratified 5-Fold)
+
+  RINGKASAN CV (Train Set — bukan test set):
+    Metrik                     Baseline       Best SVM
+    F1-Macro                     57.07%         58.84%
+    F1-Weighted                  79.30%         82.05%
+    Accuracy                     75.68%         80.62%
+
+  OUTPUT (folder: output/):
+    svm_sbert_best_model.joblib        <- BAWA ke tahap Evaluasi
+    svm_sbert_baseline_model.joblib
+    svm_sbert_tuning_results.csv
+    viz_c_vs_f1_kernel.png
+    viz_heatmap_c_gamma.png            <- UNGGULAN
+    viz_kernel_comparison.png
+    viz_cv_boxplot.png
+    viz_confusion_matrix_baseline.png
+    viz_confusion_matrix_best.png
+    viz_baseline_vs_best.png
+    viz_class_f1_per_kernel.png
+    modeling_tuning_svm_sbert_log.txt
+
+  CARA LOAD DI TAHAP EVALUASI:
+    import joblib, numpy as np
+    model  = joblib.load('output/svm_sbert_best_model.joblib')
+    X_test = np.load('data/X_test_emb.npy')
+    y_test = np.load('data/y_test.npy')
+    # Evaluasi FINAL di tahap Evaluasi — bukan di sini!
+
+  Waktu total: 0h 16m 11s
+=================================================================

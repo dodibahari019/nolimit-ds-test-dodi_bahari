@@ -1,0 +1,18 @@
+CLASSIFICATION REPORT - SVM RBF C=1 gamma=scale
+Test Set Evaluasi Final - 2026-06-05 02:52:44
+============================================================
+
+              precision    recall  f1-score   support
+
+    Negative       0.56      0.78      0.66       222
+     Neutral       0.21      0.35      0.27        65
+    Positive       0.95      0.82      0.88       912
+
+    accuracy                           0.79      1199
+   macro avg       0.58      0.65      0.60      1199
+weighted avg       0.84      0.79      0.80      1199
+
+
+CV F1-Macro (dari tahap Modeling): 58.8400%
+Test F1-Macro                    : 60.0622%
+Generalization Gap               : +1.2222%

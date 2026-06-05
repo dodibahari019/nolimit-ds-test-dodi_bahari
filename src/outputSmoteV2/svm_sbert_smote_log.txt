@@ -1,0 +1,165 @@
+
+=================================================================
+  MODELING + TUNING SVM + SBERT + SMOTE (v2.0)
+  Start  : 2026-06-05 03:14:25
+  PERUBAHAN dari v1.0:
+    SMOTE k_neighbors=7 | strategy='auto'
+    Neutral 262 -> ~3647 (x14 oversampling)
+  TARGET: Neutral F1 naik dari 26.74% (v1.0 test)
+  OUTPUT: prefix 'svm_sbert_smote_*' (tidak overwrite v1)
+=================================================================
+  [OK]   imbalanced-learn tersedia
+
+=================================================================
+  TAHAP A: LOAD DATA
+=================================================================
+  [OK]   X_train : (4794, 384)  dtype=float32
+  [OK]   y_train : (4794,)
+  [OK]   Classes : ['negative', 'neutral', 'positive']
+
+  [INFO] Distribusi kelas SEBELUM SMOTE:
+    0 -> negative     |   885 sampel (18.5%)
+    1 -> neutral      |   262 sampel (5.5%)
+    2 -> positive     |  3647 sampel (76.1%)
+
+=================================================================
+  TAHAP B: SMOTE OVERSAMPLING
+=================================================================
+
+  [INFO] SMOTE params:
+    k_neighbors     = 7
+    sampling_strategy = 'auto'
+    random_state    = 42
+  [INFO] Kelas target: Neutral (262 -> ~3647)
+  [PENTING] SMOTE hanya pada X_train — X_test TIDAK DISENTUH
+  [OK]   SMOTE selesai dalam 4.53s
+  [OK]   X_train baru: (10941, 384)  (dari 4794 -> 10941 sampel)
+
+  [INFO] Distribusi kelas SESUDAH SMOTE:
+    0 -> negative     |  3647 sampel (33.3%)
+    1 -> neutral      |  3647 sampel (33.3%)
+    2 -> positive     |  3647 sampel (33.3%)
+  [OK]   viz_svm_sbert_smote_smote_distribution.png (131 KB)
+
+=================================================================
+  TAHAP C: BASELINE MODEL (SVC Linear C=1.0 + SMOTE, CV)
+=================================================================
+
+  [CV EVAL - Baseline SVC+SMOTE (Linear C=1.0)]
+    F1-Macro   : 78.9708% (+/-0.5396%)  <- METRIK UTAMA
+    F1-Weighted: 78.9706%
+    Accuracy   : 78.9050%
+    Per fold   : ['79.84%', '78.68%', '78.85%', '79.24%', '78.24%']
+  [OK]   Baseline fit selesai dalam 139.67s | n_support=6364
+  [OK]   CV F1-Macro (baseline+SMOTE): 78.9708%
+  [OK]   svm_sbert_smote_baseline_model.joblib tersimpan
+
+=================================================================
+  TAHAP D: HYPERPARAMETER TUNING (GridSearchCV + SMOTE)
+=================================================================
+
+  [INFO] Grid: C=[0.1, 1, 10, 100] | kernel=['linear', 'rbf'] | gamma=['scale', 'auto', 0.01, 0.001]
+  [INFO] Total kombinasi: 4 linear + 16 rbf = 20
+  [INFO] Training pada X_train+SMOTE (10941 sampel) - akan lebih lama
+
+  Menjalankan GridSearchCV pada X_train+SMOTE...
+  [WARN] Dengan SMOTE data ~10941 sampel, tuning bisa 2-3x lebih lama dari v1.0
+  [OK]   GridSearchCV selesai dalam 1451.51s (24.2 menit)
+  [OK]   BEST PARAMS : {'C': 100, 'gamma': 'scale', 'kernel': 'rbf'}
+  [OK]   BEST CV F1-Macro (+SMOTE): 97.0338%
+
+  [COMPARE] v1.0 CV F1-Macro (tanpa SMOTE) = 58.84%
+  [COMPARE] v2.0 CV F1-Macro (+ SMOTE)     = 97.0338%
+  [COMPARE] Gain CV                         = +38.1938%
+    LINEAR C=0.1 gamma=N/A: F1=72.667% (+/-0.503%)
+    LINEAR C=1 gamma=N/A: F1=78.971% (+/-0.540%)
+    LINEAR C=10 gamma=N/A: F1=82.926% (+/-0.685%)
+    LINEAR C=100 gamma=N/A: F1=60.900% (+/-3.590%)
+    RBF C=0.1 gamma=scale: F1=80.739% (+/-0.500%)
+    RBF C=0.1 gamma=auto: F1=40.940% (+/-12.171%)
+    RBF C=0.1 gamma=0.01: F1=51.416% (+/-3.623%)
+    RBF C=0.1 gamma=0.001: F1=40.939% (+/-12.171%)
+    RBF C=1 gamma=scale: F1=95.046% (+/-0.467%)
+    RBF C=1 gamma=auto: F1=49.154% (+/-6.994%)
+    RBF C=1 gamma=0.01: F1=68.598% (+/-0.380%)
+    RBF C=1 gamma=0.001: F1=50.722% (+/-3.165%)
+    RBF C=10 gamma=scale: F1=96.961% (+/-0.321%)
+    RBF C=10 gamma=auto: F1=70.677% (+/-0.509%)
+    RBF C=10 gamma=0.01: F1=74.599% (+/-0.364%)
+    RBF C=10 gamma=0.001: F1=68.763% (+/-0.484%)
+    RBF C=100 gamma=scale: F1=97.034% (+/-0.332%) <-- BEST
+    RBF C=100 gamma=auto: F1=77.336% (+/-0.523%)
+    RBF C=100 gamma=0.01: F1=81.541% (+/-0.545%)
+    RBF C=100 gamma=0.001: F1=74.514% (+/-0.337%)
+  [OK]   svm_sbert_smote_tuning_results.csv tersimpan (20 kombinasi)
+
+=================================================================
+  TAHAP E: EVALUASI BEST MODEL via CV (+SMOTE)
+=================================================================
+
+  [CV EVAL - Best SVC+SMOTE (RBF C=100)]
+    F1-Macro   : 97.0338% (+/-0.3316%)  <- METRIK UTAMA
+    F1-Weighted: 97.0338%
+    Accuracy   : 97.0478%
+    Per fold   : ['96.65%', '97.06%', '96.69%', '97.52%', '97.25%']
+
+=================================================================
+  TAHAP F: MEMBUAT VISUALISASI
+=================================================================
+  [OK]   viz_svm_sbert_smote_c_vs_f1_kernel.png (148 KB)
+  [OK]   viz_svm_sbert_smote_heatmap_c_gamma.png (125 KB) <- UNGGULAN
+  [OK]   viz_svm_sbert_smote_kernel_comparison.png (51 KB)
+  [OK]   viz_svm_sbert_smote_cv_boxplot.png (53 KB)
+  [OK]   viz_svm_sbert_smote_cm_baseline.png (75 KB)
+  [OK]   viz_svm_sbert_smote_cm_best.png (70 KB)
+  [OK]   viz_svm_sbert_smote_smote_vs_no_smote.png (139 KB) <- UNGGULAN
+
+=================================================================
+  TAHAP G: REFIT + SIMPAN BEST MODEL (+SMOTE)
+=================================================================
+[INFO] Refit pada SELURUH X_train+SMOTE dengan probability=True
+  [OK]   Refit selesai dalam 87.15s | n_support=3543
+  [OK]   svm_sbert_smote_best_model.joblib -> 6062 KB
+  [OK]   Params: {'kernel': 'rbf', 'C': 100, 'class_weight': 'balanced', 'max_iter': 5000, 'tol': 0.0001, 'cache_size': 500, 'random_state': 42, 'probability': True, 'gamma': 'scale'}
+
+=================================================================
+  MODELING + SMOTE SELESAI!
+
+  SMOTE: k_neighbors=7 | strategy='auto'
+  Data setelah SMOTE: 10941 sampel (dari 4794)
+
+  BEST MODEL (+SMOTE):
+    kernel : RBF
+    C      : 100
+    gamma  : scale
+    CV F1-Macro: 97.0338%
+
+  PERBANDINGAN CV:
+    Metrik                    v1.0 (no SMOTE)    v2.0 (+SMOTE)
+    F1-Macro                           58.84%           97.03%
+    F1-Weighted                        82.05%           97.03%
+    Accuracy                           80.62%           97.05%
+
+  F1 PER KELAS (CV):
+    Kelas               v1.0 CV    v2.0+SMOTE
+    Negative           N/A (CV)        96.33%
+    Neutral            N/A (CV)        99.28%
+    Positive           N/A (CV)        95.50%
+
+  LANGKAH SELANJUTNYA:
+    Jalankan evaluasi.py dengan model:
+    output/svm_sbert_smote_best_model.joblib
+    Update IN_BEST_MODEL di evaluasi.py ke path tersebut
+    Bandingkan Test F1-Macro dan Neutral F1 dengan v1.0
+
+  OUTPUT:
+    svm_sbert_smote_best_model.joblib
+    svm_sbert_smote_baseline_model.joblib
+    svm_sbert_smote_tuning_results.csv
+    viz_svm_sbert_smote_smote_distribution.png
+    viz_svm_sbert_smote_smote_vs_no_smote.png  <- UNGGULAN
+    viz_svm_sbert_smote_heatmap_c_gamma.png    <- UNGGULAN
+    + 5 viz lainnya
+
+  Waktu total: 0h 31m 59s
+=================================================================

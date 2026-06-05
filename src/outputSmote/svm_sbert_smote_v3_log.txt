@@ -1,0 +1,153 @@
+
+=================================================================
+  MODELING + TUNING SVM + SBERT + SMOTE PARTIAL (v3.0)
+  Start  : 2026-06-05 10:11:14
+  PERBAIKAN dari v2.0:
+    SMOTE partial: Neutral 262->800 (bukan 3647!)
+    Grid konservatif: C=[0.1, 1, 10, 0.1, 1, 10] (hapus C=100)
+    Validasi gap CV vs estimasi test
+  TARGET: Neutral F1 naik dari 26.74% TANPA overfitting
+=================================================================
+
+=================================================================
+  TAHAP A: LOAD DATA
+=================================================================
+  [OK]   X_train : (4794, 384)  dtype=float32
+  [OK]   y_train : (4794,)
+  [OK]   Classes : ['negative', 'neutral', 'positive']
+
+  [INFO] Distribusi kelas SEBELUM SMOTE:
+    0 -> negative     |   885 (18.5%)
+    1 -> neutral      |   262 (5.5%)
+    2 -> positive     |  3647 (76.1%)
+
+=================================================================
+  TAHAP B: SMOTE PARTIAL (v3.0 — BUKAN FULL BALANCE)
+=================================================================
+
+  [INFO] Strategi SMOTE PARTIAL:
+    Kelas 0 (negative): 885 -> 1200 (1.4x)
+    Kelas 1 (neutral): 262 -> 800 (3.1x)
+  [INFO] k_neighbors = 5
+  [PENTING] SMOTE HANYA pada X_train. X_test TIDAK DISENTUH.
+  [PENTING] Strategi partial mencegah overfitting vs full balance v2.0
+  [OK]   SMOTE selesai dalam 4.11s
+  [OK]   X_train baru: (5647, 384) (dari 4794 -> 5647)
+
+  [INFO] Distribusi kelas SESUDAH SMOTE:
+    0 -> negative     |  1200 (21.3%) [dari 885, +315 synthetic]
+    1 -> neutral      |   800 (14.2%) [dari 262, +538 synthetic]
+    2 -> positive     |  3647 (64.6%) [dari 3647, +0 synthetic]
+  [OK]   viz_svm_sbert_smote_v3_smote_distribution.png (122 KB)
+
+=================================================================
+  TAHAP C: BASELINE (Linear C=1 + SMOTE Partial, CV)
+=================================================================
+
+  [CV EVAL - Baseline Linear C=1 + SMOTE Partial]
+    F1-Macro   : 70.2686% (+/-1.3734%)  <- METRIK UTAMA
+    Est.Test   : 68.2085%  (CV - 1.5*std, konservatif)
+    F1-Weighted: 78.6136%
+    Accuracy   : 77.2093%
+    Per fold   : ['68.85%', '70.28%', '68.63%', '72.03%', '71.54%']
+
+  [INFO] F1 per kelas Baseline (CV+SMOTE):
+    negative    : 68.31%
+    neutral     : 55.46%
+    positive    : 87.10%
+  [OK]   Baseline fit: 41.23s | n_support=3009
+  [OK]   svm_sbert_smote_v3_baseline_model.joblib tersimpan
+
+=================================================================
+  TAHAP D: HYPERPARAMETER TUNING (Grid Konservatif)
+=================================================================
+
+  [INFO] Grid konservatif (v3.0 fix):
+    Linear C  = [0.1, 1, 10]  (hapus C=100 yang overfit di SMOTE)
+    RBF    C  = [0.1, 1, 10]
+    Gamma     = ['scale', 0.01]    (hanya 2, lebih cepat)
+    Total     = 9 kombinasi x 5 fold = 45 fits
+  [INFO] Training pada 5647 sampel (jauh lebih kecil dari v2.0 10941)
+
+  Menjalankan GridSearchCV...
+  [OK]   GridSearchCV selesai: 183.3s (3.1 menit)
+  [OK]   BEST PARAMS : {'C': 10, 'gamma': 'scale', 'kernel': 'rbf'}
+  [OK]   BEST CV F1-Macro: 87.3108%
+    LINEAR C=0.1 gamma=N/A: F1=66.513% (+/-1.178%) EstTest=64.746%
+    LINEAR C=1 gamma=N/A: F1=70.269% (+/-1.373%) EstTest=68.208%
+    LINEAR C=10 gamma=N/A: F1=72.890% (+/-0.579%) EstTest=72.021%
+    RBF C=0.1 gamma=scale: F1=69.624% (+/-1.443%) EstTest=67.460%
+    RBF C=0.1 gamma=0.01: F1=26.502% (+/-0.683%) EstTest=25.478%
+    RBF C=1 gamma=scale: F1=82.588% (+/-0.617%) EstTest=81.662%
+    RBF C=1 gamma=0.01: F1=63.941% (+/-1.215%) EstTest=62.118%
+    RBF C=10 gamma=scale: F1=87.311% (+/-1.070%) EstTest=85.705% <-- BEST
+    RBF C=10 gamma=0.01: F1=67.266% (+/-1.143%) EstTest=65.552%
+
+=================================================================
+  TAHAP E: VALIDASI GAP CV vs GENERALISASI
+=================================================================
+
+  CV F1-Macro  : 87.3108%
+  CV Std       : 1.0703%
+  Est. Test    : 85.7052%  (CV - 1.5*std)
+  Gap (est)    : 1.6055%
+  [OK]   Gap 1.61% dalam batas normal (< 12%)
+  [OK]   svm_sbert_smote_v3_tuning_results.csv (9 kombinasi)
+
+=================================================================
+  TAHAP F: EVALUASI BEST MODEL via CV
+=================================================================
+
+  [CV EVAL - Best RBF C=10]
+    F1-Macro   : 87.3108% (+/-1.0703%)  <- METRIK UTAMA
+    Est.Test   : 85.7052%  (CV - 1.5*std, konservatif)
+    F1-Weighted: 89.7637%
+    Accuracy   : 89.7466%
+    Per fold   : ['88.83%', '87.91%', '85.62%', '87.32%', '86.87%']
+
+  [INFO] F1 per kelas Best Model (CV+SMOTE Partial):
+    negative    : 80.46%  (vs v1.0 test: 65.54%  diff: +14.92%)
+    neutral     : 88.36%  (vs v1.0 test: 26.74%  diff: +61.62%)
+    positive    : 93.15%  (vs v1.0 test: 87.91%  diff: +5.24%)
+
+=================================================================
+  TAHAP G: VISUALISASI
+=================================================================
+  [OK]   viz_svm_sbert_smote_v3_c_vs_f1.png (136 KB)
+  [OK]   viz_svm_sbert_smote_v3_cv_boxplot.png (48 KB)
+  [OK]   viz_svm_sbert_smote_v3_cm_baseline.png (59 KB)
+  [OK]   viz_svm_sbert_smote_v3_cm_best.png (58 KB)
+  [OK]   viz_svm_sbert_smote_v3_version_comparison.png (107 KB) <- UNGGULAN
+
+=================================================================
+  TAHAP H: REFIT + SIMPAN BEST MODEL
+=================================================================
+  [OK]   Refit selesai: 36.97s | n_support=2659
+  [OK]   svm_sbert_smote_v3_best_model.joblib -> 4556 KB
+  [OK]   Params: {'kernel': 'rbf', 'C': 10, 'class_weight': 'balanced', 'max_iter': 3000, 'tol': 0.0001, 'cache_size': 300, 'random_state': 42, 'probability': True, 'gamma': 'scale'}
+
+=================================================================
+  MODELING v3.0 (SMOTE PARTIAL) SELESAI!
+
+  SMOTE: partial, Neutral 262->800 | k_neighbors=5
+  Data setelah SMOTE: 5647 sampel
+
+  BEST MODEL:
+    kernel : RBF
+    C      : 10
+    gamma  : scale
+    CV F1-Macro : 87.3108%
+    Est. Test   : 85.7052% (CV - 1.5*std)
+
+  F1 PER KELAS (CV+SMOTE Partial):
+    Kelas             v1.0 Test      v3.0 CV
+    Negative             65.54%       80.46%
+    Neutral              26.74%       88.36%
+    Positive             87.91%       93.15%
+
+  LANGKAH SELANJUTNYA:
+    Jalankan evaluasiSmoteV3.py
+    Model: outputSmoteV3/svm_sbert_smote_v3_best_model.joblib
+
+  Waktu total: 0h 6m 13s
+=================================================================
